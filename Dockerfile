@@ -33,4 +33,4 @@ WORKDIR $HOME
 
 # Use the entrypoint script to install the project in editable mode
 COPY --chown=$USER:$USER entrypoint.sh /entrypoint.sh
-CMD ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

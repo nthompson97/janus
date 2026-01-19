@@ -1,5 +1,5 @@
 def main() -> None:
-    print("hello sexy ass world, what's crackin")
+    print("hello sexy ass world")
 
 
 if __name__ == "__main__":
