@@ -21,10 +21,13 @@ ENV UV_NO_DEV=1 UV_LINK_MODE=copy UV_WORKING_DIR=/app
 #     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
 #     uv sync --locked --no-install-project
 
+COPY --chown=$USER:$USER pyproject.toml uv.lock ./
+RUN uv sync --locked --no-install-project
+
 COPY --chown=$USER:$USER . /app
-#RUN --mount=type=cache,target=/root/.cache/uv \
-#    uv sync --locked
-RUN uv sync --locked
+# RUN --mount=type=cache,target=/root/.cache/uv \
+#    uv sync
+# RUN uv sync --locked
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
@@ -33,4 +36,6 @@ WORKDIR $HOME
 
 # Use the entrypoint script to install the project in editable mode
 COPY --chown=$USER:$USER entrypoint.sh /entrypoint.sh
+
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["sleep", "infinity"]
