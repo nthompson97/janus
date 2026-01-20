@@ -20,16 +20,27 @@ up:
 		podman volume create $(NAME)-bash-history; \
 	fi
 
+	@if ! podman volume exists $(NAME)-grafana-data 2>/dev/null; then \
+		podman volume create $(NAME)-grafana-data; \
+	fi
+
 	podman pod create \
 		--name $(NAME)-pod \
 		--userns keep-id \
-		--publish 6397:6397
+		--publish 6397:6397 \
+		--publish 3000:3000
 
 	podman run -d \
 		--pod $(NAME)-pod \
 		--name $(NAME)-redis \
 		redis:latest
 	
+	podman run -d \
+		--pod $(NAME)-pod \
+		--name $(NAME)-grafana \
+		--volume $(NAME)-grafana-data:/var/lib/grafana \
+		grafana:latest
+
 	podman run -d \
 		--pod $(NAME)-pod \
 		--name $(NAME) \

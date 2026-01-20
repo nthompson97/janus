@@ -5,7 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "ipython>=9.9.0",
     "pytest>=9.0.2",
+    "redis>=7.1.0",
     "requests>=2.32.5",
     "ruff>=0.14.13",
     "websockets>=16.0",

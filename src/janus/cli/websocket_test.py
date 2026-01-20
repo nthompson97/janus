@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-from typing import Type
 
 import websockets
 
@@ -20,7 +19,7 @@ COINS = [
 ]
 
 
-async def subscribe_bbo(ws: websockets.ClientConnection, coin: Type[Coin]) -> None:
+async def subscribe_bbo(ws: websockets.ClientConnection, coin: type[Coin]) -> None:
     msg = {
         "method": "subscribe",
         "subscription": {"type": "bbo", "coin": coin.name},
