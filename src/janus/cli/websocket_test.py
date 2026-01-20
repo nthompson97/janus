@@ -1,20 +1,29 @@
 import asyncio
 import json
 import logging
+from typing import Type
 
 import websockets
 
+from janus.core.metadata import Coin, Bitcoin, Ethereum
 
 TIMEOUT = 3
+MAX_COUNT = 10
 
-WS_URL = "wss://api.hyperliquid.xyz/ws"  # prod
-# WS_URL = "wss://api.hyperliquid-testnet.xyz/ws"  # testnet
+# WS_URL = "wss://api.hyperliquid.xyz/ws"  # prod
+WS_URL = "wss://api.hyperliquid-testnet.xyz/ws"  # testnet
 
 
-async def subscribe_bbo(ws: websockets.ClientConnection, coin: str) -> None:
+COINS = [
+    Bitcoin,
+    Ethereum,
+]
+
+
+async def subscribe_bbo(ws: websockets.ClientConnection, coin: Type[Coin]) -> None:
     msg = {
         "method": "subscribe",
-        "subscription": {"type": "bbo", "coin": coin},
+        "subscription": {"type": "bbo", "coin": coin.name},
     }
 
     await ws.send(json.dumps(msg))
@@ -27,7 +36,8 @@ async def main() -> None:
             async with websockets.connect(WS_URL) as ws:
                 logging.info(f"Connected to {WS_URL}")
 
-                await subscribe_bbo(ws, coin="BTC")
+                for coin in COINS:
+                    await subscribe_bbo(ws, coin=coin)
 
                 count = 0
 
@@ -40,7 +50,12 @@ async def main() -> None:
 
                     count += 1
 
-        except (websockets.ConnectionError, asyncio.TimeoutError) as e:
+                    if count > MAX_COUNT:
+                        break
+
+                break
+
+        except Exception as e:
             logging.error(f"Disconnect from {WS_URL}")
             logging.error(e)
 
