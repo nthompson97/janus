@@ -46,6 +46,8 @@ up:
 		--name $(NAME) \
 		--volume $(NAME)-bash-history:/home/ubuntu/bash_history \
 		--volume ./:/home/ubuntu/repo/:z \
+		--volume ~/.claude:/home/ubuntu/.claude:z \
+		--volume ~/.claude.json:/home/ubuntu/.claude.json:z \
 		--volume /app/.venv \
 		--workdir /home/ubuntu/repo \
 		$(NAME):latest
