@@ -35,8 +35,16 @@ async def main() -> None:
             async with websockets.connect(WS_URL) as ws:
                 logging.info(f"Connected to {WS_URL}")
 
-                for coin in COINS:
-                    await subscribe_bbo(ws, coin=coin)
+                # for coin in COINS:
+                #    await subscribe_bbo(ws, coin=coin)
+                coin = "@100"
+                msg = {
+                    "method": "subscribe",
+                    "subscription": {"type": "bbo", "coin": coin},
+                }
+
+                await ws.send(json.dumps(msg))
+                logging.info(f"Subscribed to BBO for {coin}")
 
                 count = 0
 
