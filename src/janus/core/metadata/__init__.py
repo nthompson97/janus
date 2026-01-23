@@ -1,4 +1,5 @@
-from ._base import Coin
+from ._base import Coin, Perpetual, Spot
 
-from .btc import Bitcoin
-from .eth import Ethereum
+from .btc import BTC
+from .eth import ETH
+from .usdc import USDC

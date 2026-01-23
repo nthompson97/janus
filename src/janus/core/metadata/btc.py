@@ -1,10 +1,11 @@
 from ._base import Coin
+from typing import final
 
 
-class Bitcoin(Coin):
-    name: str = "BTC"
-    aliases: list[str] = [
+@final
+class BTC(Coin):
+    name = "BTC"
+    aliases = [
         "BTC",
-        "BTC-USC",
         "Bitcoin",
     ]

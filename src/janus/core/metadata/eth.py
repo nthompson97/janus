@@ -1,10 +1,11 @@
 from ._base import Coin
+from typing import final
 
 
-class Ethereum(Coin):
-    name: str = "ETH"
-    aliases: list[str] = [
+@final
+class ETH(Coin):
+    name = "ETH"
+    aliases = [
         "ETH",
-        "ETH-USC",
         "Ethereum",
     ]

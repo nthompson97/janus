@@ -1,13 +1,28 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, override
 
 
-@dataclass(frozen=True)
-class Coin:
+class _CoinMeta(type):
+    """Metaclass for Coin that enables operator overloading on classes.
+
+    This allows syntax like:
+        BTC / USDC  -> Spot(Bitcoin, USDC)
+        BTC - USDC  -> Perpetual(Bitcoin, USDC)
+    """
+
+    def __truediv__(cls: type[Coin], other: type[Coin]) -> Spot:
+        return Spot(base=cls, quote=other)
+
+    def __sub__(cls: type[Coin], other: type[Coin]) -> Perpetual:
+        return Perpetual(base=cls, quote=other)
+
+
+@dataclass(frozen=True, eq=False)
+class Coin(metaclass=_CoinMeta):
     name: ClassVar[str]
-    aliases: ClassVar[list[str]] = []  # field(default_factory=lambda: [])
+    aliases: ClassVar[list[str]] = []
 
     _registry: ClassVar[dict[str, type["Coin"]]] = {}
 
@@ -33,3 +48,70 @@ class Coin:
             raise KeyError(
                 f"Unkown coin name or alias: {name}. Known keys: {cls._registry}"
             )
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Coin):
+            return False
+
+        return self.name == other.name
+
+
+@dataclass(frozen=True, eq=False)
+class Spot:
+    """A spot (cross) asset representing a pair of coins.
+
+    Represents a spot trading pair like BTC/USDC. Can be constructed
+    using the division operator on Coin instances:
+
+        >>> BTC / USDC
+        Spot(base=Bitcoin, quote=USDC)
+    """
+
+    base: type[Coin]
+    quote: type[Coin]
+
+    @override
+    def __str__(self) -> str:
+        return f"{self.base.name}/{self.quote.name}"
+
+    @override
+    def __repr__(self) -> str:
+        return f"Spot({self.base.name}, {self.quote.name})"
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Spot):
+            return False
+
+        return self.base == other.base and self.quote == other.quote
+
+
+@dataclass(frozen=True, eq=False)
+class Perpetual:
+    """A perpetual futures asset representing a pair of coins.
+
+    Represents a perpetual futures contract like BTC-USDC. Can be constructed
+    using the subtraction operator on Coin instances:
+
+        >>> BTC - USDC
+        Perpetual(base=Bitcoin, quote=USDC)
+    """
+
+    base: type[Coin]
+    quote: type[Coin]
+
+    @override
+    def __str__(self) -> str:
+        return f"{self.base.name}-{self.quote.name}"
+
+    @override
+    def __repr__(self) -> str:
+        return f"Perpetual({self.base.name}, {self.quote.name})"
+
+    @override
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Perpetual):
+            return False
+
+        return self.base == other.base and self.quote == other.quote

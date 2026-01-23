@@ -4,7 +4,7 @@ import logging
 
 import websockets
 
-from janus.core.metadata import Coin, Bitcoin, Ethereum
+from janus.core.metadata import Coin, BTC, ETH
 
 TIMEOUT = 3
 MAX_COUNT = 10
@@ -14,8 +14,8 @@ WS_URL = "wss://api.hyperliquid-testnet.xyz/ws"  # testnet
 
 
 COINS = [
-    Bitcoin,
-    Ethereum,
+    BTC,
+    ETH,
 ]
 
 
