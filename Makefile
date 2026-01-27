@@ -33,13 +33,13 @@ up:
 	podman run -d \
 		--pod $(NAME)-pod \
 		--name $(NAME)-redis \
-		redis:latest
+		docker.io/library/redis:latest
 	
 	podman run -d \
 		--pod $(NAME)-pod \
 		--name $(NAME)-grafana \
 		--volume $(NAME)-grafana-data:/var/lib/grafana \
-		grafana:latest
+		docker.io/grafana/grafana:latest
 
 	podman run -d \
 		--pod $(NAME)-pod \
