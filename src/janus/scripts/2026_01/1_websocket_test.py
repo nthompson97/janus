@@ -10,6 +10,7 @@ TIMEOUT = 3
 MAX_COUNT = 10
 
 WS_URL = "wss://api.hyperliquid-testnet.xyz/ws"  # testnet
+WS_URL = "wss://api.hyperliquid.xyz/ws"  # prod
 
 
 async def subscribe_bbo(ws: websockets.ClientConnection, coin: type[Coin]) -> None:
@@ -28,7 +29,7 @@ async def main() -> None:
             async with websockets.connect(WS_URL) as ws:
                 logging.info(f"Connected to {WS_URL}")
 
-                coin = "BTC"
+                coin = "@142"
                 msg = {
                     "method": "subscribe",
                     "subscription": {"type": "bbo", "coin": coin},
@@ -40,6 +41,7 @@ async def main() -> None:
                 count = 0
 
                 async for message in ws:
+                    logging.info(message)
                     data = json.loads(message)
 
                     logging.info(f"Iteration {count}")

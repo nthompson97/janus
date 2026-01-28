@@ -32,14 +32,14 @@ async def main() -> None:
             name_to_coin[asset_info["name"]] = asset_info["name"]
             asset_to_sz_decimals[asset] = asset_info["szDecimals"]
 
-        from IPython import embed
-
-        embed(using="asyncio")
-
-        # xxx
+    return spot_meta, meta, coin_to_asset, name_to_coin, asset_to_sz_decimals
 
 
 if __name__ == "__main__":
-    nest_asyncio.apply()
+    spot_meta, meta, coin_to_asset, name_to_coin, asset_to_sz_decimals = asyncio.run(
+        main()
+    )
 
-    asyncio.run(main())
+    from IPython import embed
+
+    embed()

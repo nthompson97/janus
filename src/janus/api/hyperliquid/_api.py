@@ -11,9 +11,6 @@ from ._errors import ClientError, ServerError
 MAINNET_API_URL = "https://api.hyperliquid.xyz"
 TESTNET_API_URL = "https://api.hyperliquid-testnet.xyz"
 
-MAINNET_WS_URL = "wss://api.hyperliquid.xyz/ws"
-TESTNET_WS_URL = "wss://api.hyperliquid-testnet.xyz/ws"
-
 
 class HyperLiquidAPI:
     """Async HyperLiquid API client.
@@ -26,7 +23,7 @@ class HyperLiquidAPI:
 
     def __init__(
         self,
-        base_url: str = TESTNET_API_URL,
+        base_url: str = MAINNET_API_URL,
         timeout: float | None = None,
     ) -> None:
         self.base_url = base_url
