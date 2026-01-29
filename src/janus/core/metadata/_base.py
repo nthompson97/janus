@@ -50,11 +50,23 @@ class Coin(metaclass=_CoinMeta):
             )
 
     @override
+    def __str__(self) -> str:
+        return self.name
+
+    @override
+    def __repr__(self) -> str:
+        return f"Coin({self.name})"
+
+    @override
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Coin):
             return False
 
         return self.name == other.name
+
+    @override
+    def __hash__(self) -> int:
+        return hash(self.name)
 
 
 @dataclass(frozen=True, eq=False)
@@ -86,6 +98,10 @@ class Spot:
 
         return self.base == other.base and self.quote == other.quote
 
+    @override
+    def __hash__(self) -> int:
+        return hash((self.base.name, self.quote.name))
+
 
 @dataclass(frozen=True, eq=False)
 class Perpetual:
@@ -115,3 +131,7 @@ class Perpetual:
             return False
 
         return self.base == other.base and self.quote == other.quote
+
+    @override
+    def __hash__(self) -> int:
+        return hash((self.base.name, self.quote.name))

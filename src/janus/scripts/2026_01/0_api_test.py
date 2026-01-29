@@ -1,6 +1,5 @@
 import asyncio
 from janus.api.hyperliquid import HyperLiquidAPI
-import nest_asyncio
 
 
 async def main() -> None:

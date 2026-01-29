@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 import json
 import logging
 from typing import Any
@@ -7,9 +8,16 @@ from typing import Any
 import aiohttp
 
 from ._errors import ClientError, ServerError
+from janus.core.metadata import Coin, Perpetual, Spot, USDC
 
 MAINNET_API_URL = "https://api.hyperliquid.xyz"
 TESTNET_API_URL = "https://api.hyperliquid-testnet.xyz"
+
+
+@dataclass()
+class ProductMetadata:
+    coin: str
+    decimals: int
 
 
 class HyperLiquidAPI:
@@ -29,6 +37,8 @@ class HyperLiquidAPI:
         self.base_url = base_url
         self.timeout = aiohttp.ClientTimeout(total=timeout) if timeout else None
         self._session: aiohttp.ClientSession | None = None
+
+        self._metadata: dict[Perpetual | Spot, ProductMetadata] = dict()
 
     async def __aenter__(self) -> HyperLiquidAPI:
         await self._create_session()
@@ -129,6 +139,10 @@ class HyperLiquidAPI:
 
         raise ServerError(status_code, text)
 
+    @property
+    def metadata(self) -> dict[Perpetual | Spot, ProductMetadata]:
+        return self._metadata
+
     # -------------------------------------------------------------------------
     # Info Endpoints
     # -------------------------------------------------------------------------
@@ -173,3 +187,57 @@ class HyperLiquidAPI:
                 "type": "perpDexs",
             },
         )
+
+    # -------------------------------------------------------------------------
+    # Metadata construction
+    # -------------------------------------------------------------------------
+
+    async def build_perpetual_metadata(self) -> None:
+        meta = await self.meta()
+
+        for i, perpetual in enumerate(meta["universe"]):
+            try:
+                coin = Coin.from_name(perpetual["name"])
+
+            except KeyError:
+                ...
+
+            else:
+                # At this stage, all perpetuals are crossed with USDC
+                self._metadata[Perpetual(coin, USDC)] = ProductMetadata(
+                    coin=perpetual["name"],
+                    decimals=perpetual["szDecimals"],
+                )
+                logging.info(f"Added metadata for {coin}-USDC")
+
+    async def build_spot_metadata(self) -> None:
+        # FIXME: I'm unsure yet if this should live here or on the actual coin metadata
+        l1_mapping = {
+            "UBTC": "BTC",
+            "UETH": "ETH",
+            "USOL": "SOL",
+        }
+        meta = await self.spot_meta()
+
+        index_map = {
+            i["index"]: (l1_mapping.get(i["name"], i["name"]), i["szDecimals"])
+            for i in meta["tokens"]
+        }
+
+        for i, spot in enumerate(meta["universe"]):
+            base_idx, quote_idx = spot["tokens"]
+            base, quote = index_map[base_idx], index_map[quote_idx]
+
+            try:
+                base_coin = Coin.from_name(base[0])
+                quote_coin = Coin.from_name(quote[0])
+
+            except KeyError:
+                ...
+
+            else:
+                self._metadata[Spot(base_coin, quote_coin)] = ProductMetadata(
+                    coin=spot["name"],
+                    decimals=base[1],
+                )
+                logging.info(f"Added metadata for {base_coin}/{quote_coin}")

@@ -5,7 +5,6 @@ import json
 import logging
 from collections.abc import AsyncIterator
 from typing import Any
-from janus.core.metadata import Coin
 import websockets
 from websockets import ClientConnection
 
@@ -37,6 +36,14 @@ class HyperliquidWebsocket:
     async def __aenter__(self) -> HyperliquidWebsocket:
         self._api = HyperLiquidAPI()
         await self._api.__aenter__()
+        await asyncio.gather(
+            self._api.build_perpetual_metadata(),
+            self.api.build_spot_metadata(),
+        )
+        logging.info(f"Metadata loaded, {len(self._api.metadata)} products recognised")
+
+        for k, v in self._api.metadata.items():
+            logging.info(f"\t{k}: {v}")
 
         self._ws = await websockets.connect(self.ws_url)
         logging.info(f"Connected to {self.ws_url}")
@@ -100,5 +107,12 @@ class HyperliquidWebsocket:
 
         logging.info(f"Unsubscribed: {subscription}")
 
-    async def subscribe_bbo(self, coin: str) -> None:
-        await self._subscribe({"type": "bbo", "coin": coin})
+    async def subscribe_bbo(self, product: Perpetual | Spot) -> None:
+        try:
+            metadata = self._api.metadata[product]
+
+        except KeyError:
+            raise ValueError(f"Unable to subscribe to unrecognised product: {product}")
+
+        else:
+            await self._subscribe({"type": "bbo", "coin": metadata.coin})

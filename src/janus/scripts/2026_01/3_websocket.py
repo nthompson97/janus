@@ -1,14 +1,23 @@
 import asyncio
 import logging
 from janus.api.hyperliquid import HyperliquidWebsocket
+from janus.core.metadata import BTC, USDC, ETH, SOL
+from janus.core.metadata import Perpetual, Spot
 
-LIMIT = 10
+LIMIT: int | None = 10
+
+PRODUCTS: list[Perpetual | Spot] = [
+    BTC / USDC,  # Spot BTC
+    BTC - USDC,  # Perp BTC
+    ETH / USDC,  # Spot ETH
+    ETH - USDC,  # Perp ETH
+]
 
 
 async def main() -> None:
     async with HyperliquidWebsocket() as ws:
-        await ws.subscribe_bbo("BTC")
-        await ws.subscribe_bbo("ETH")
+        for product in PRODUCTS:
+            await ws.subscribe_bbo(product)
 
         count = 0
 

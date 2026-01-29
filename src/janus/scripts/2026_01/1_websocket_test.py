@@ -4,7 +4,7 @@ import logging
 
 import websockets
 
-from janus.core.metadata import Coin, BTC, ETH
+from janus.core.metadata import Coin
 
 TIMEOUT = 3
 MAX_COUNT = 10
