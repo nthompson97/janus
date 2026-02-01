@@ -24,17 +24,24 @@ up:
 		podman volume create $(NAME)-grafana-data; \
 	fi
 
+	# Ports: 6397=redis, 3000=grafana, 5540=redisinsight
 	podman pod create \
 		--name $(NAME)-pod \
 		--userns keep-id \
 		--publish 6397:6397 \
-		--publish 3000:3000
+		--publish 3000:3000 \
+		--publish 5540:5540
 
 	podman run -d \
 		--pod $(NAME)-pod \
 		--name $(NAME)-redis \
 		docker.io/library/redis:latest
-	
+
+	podman run -d \
+		--pod $(NAME)-pod \
+		--name $(NAME)-redis-insight \
+		docker.io/library/redisinsight:latest
+
 	podman run -d \
 		--pod $(NAME)-pod \
 		--name $(NAME)-grafana \

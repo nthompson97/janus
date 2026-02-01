@@ -10,8 +10,7 @@ import aiohttp
 from ._errors import ClientError, ServerError
 from janus.core.metadata import Coin, Perpetual, Spot, USDC
 
-MAINNET_API_URL = "https://api.hyperliquid.xyz"
-TESTNET_API_URL = "https://api.hyperliquid-testnet.xyz"
+from ._utils import get_env, get_api_url, HyperliquidEnv
 
 
 @dataclass()
@@ -31,11 +30,13 @@ class HyperLiquidAPI:
 
     def __init__(
         self,
-        base_url: str = MAINNET_API_URL,
+        env: str | HyperliquidEnv = "dev",
         timeout: float | None = None,
     ) -> None:
-        self.base_url = base_url
-        self.timeout = aiohttp.ClientTimeout(total=timeout) if timeout else None
+        self.base_url: str = get_api_url(env)
+        self.timeout: aiohttp.ClientTimeout | None = (
+            aiohttp.ClientTimeout(total=timeout) if timeout else None
+        )
         self._session: aiohttp.ClientSession | None = None
 
         self._metadata: dict[Perpetual | Spot, ProductMetadata] = dict()
@@ -211,7 +212,8 @@ class HyperLiquidAPI:
                 logging.info(f"Added metadata for {coin}-USDC")
 
     async def build_spot_metadata(self) -> None:
-        # FIXME: I'm unsure yet if this should live here or on the actual coin metadata
+        # TODO: I'm unsure yet if this should live here or on the actual coin metadata
+        # TODO: there are are few options for XRP, need to add the right mapping here
         l1_mapping = {
             "UBTC": "BTC",
             "UETH": "ETH",

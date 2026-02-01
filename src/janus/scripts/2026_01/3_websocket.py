@@ -15,7 +15,7 @@ PRODUCTS: list[Perpetual | Spot] = [
 
 
 async def main() -> None:
-    async with HyperliquidWebsocket() as ws:
+    async with HyperliquidWebsocket(env="dev") as ws:
         for product in PRODUCTS:
             await ws.subscribe_bbo(product)
 

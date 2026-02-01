@@ -9,9 +9,7 @@ import websockets
 from websockets import ClientConnection
 
 from ._api import HyperLiquidAPI
-
-MAINNET_WS_URL = "wss://api.hyperliquid.xyz/ws"
-TESTNET_WS_URL = "wss://api.hyperliquid-testnet.xyz/ws"
+from ._utils import get_env, get_ws_url, HyperliquidEnv
 
 
 class HyperliquidWebsocket:
@@ -24,17 +22,15 @@ class HyperliquidWebsocket:
                 print(message)
     """
 
-    def __init__(
-        self,
-        ws_url: str = MAINNET_WS_URL,
-    ) -> None:
-        self.ws_url = ws_url
+    def __init__(self, env: str | HyperliquidEnv = "dev") -> None:
+        self.env = env
+        self.ws_url: str = get_ws_url(env)
         self._ws: ClientConnection | None = None
-        self._api = None
+        self._api: HyperLiquidAPI | None = None
         self._subscriptions: list[dict[str, Any]] = []
 
     async def __aenter__(self) -> HyperliquidWebsocket:
-        self._api = HyperLiquidAPI()
+        self._api = HyperLiquidAPI(env=self.env)
         await self._api.__aenter__()
         await asyncio.gather(
             self._api.build_perpetual_metadata(),
