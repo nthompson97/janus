@@ -37,10 +37,10 @@ up:
 		--name $(NAME)-redis \
 		docker.io/library/redis:latest
 
-	podman run -d \
-		--pod $(NAME)-pod \
-		--name $(NAME)-redis-insight \
-		docker.io/library/redisinsight:latest
+	# podman run -d \
+	#	--pod $(NAME)-pod \
+	#	--name $(NAME)-redis-insight \
+	#	docker.io/library/redisinsight:latest
 
 	podman run -d \
 		--pod $(NAME)-pod \
